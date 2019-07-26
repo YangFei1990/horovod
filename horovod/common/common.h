@@ -1,4 +1,5 @@
 // Copyright 2018 Uber Technologies, Inc. All Rights Reserved.
+// Modifications copyright (C) 2019 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -49,6 +50,15 @@ namespace common {
 #define NCCL_BCAST "NCCL_BCAST"
 #define COPY_ALLGATHER_OUTPUT "COPY_ALLGATHER_OUTPUT"
 #define ALLOCATE_SHARED_BUFFER "ALLOCATE_SHARED_BUFFER"
+#define MLSL_ALLREDUCE "MLSL_ALLREDUCE"
+#define MLSL_ALLGATHER "MLSL_ALLGATHER"
+#define MLSL_BCAST "MLSL_BCAST"
+#define GLOO_ALLREDUCE "GLOO_ALLREDUCE"
+#define GLOO_ALLGATHER "GLOO_ALLGATHER"
+#define GLOO_BCAST "GLOO_BCAST"
+
+// String constant for gloo interface.
+#define GLOO_DEFAULT_IFACE "eth0"
 
 // Device ID used for CPU.
 #define CPU_DEVICE_ID (-1)
@@ -108,6 +118,7 @@ public:
   int dims() const;
   int64_t dim_size(int idx) const;
   int64_t num_elements() const;
+  const std::vector<int64_t>& to_vector() const;
 
   inline bool operator==(const TensorShape& rhs) const {
     return shape_ == rhs.shape_;

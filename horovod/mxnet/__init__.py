@@ -17,7 +17,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from horovod.common import check_extension
+from horovod.common.util import check_extension
 
 check_extension('horovod.mxnet', 'HOROVOD_WITH_MXNET',
                 __file__, 'mpi_lib')
@@ -51,7 +51,8 @@ class DistributedOptimizer(mx.optimizer.Optimizer):
     def _do_allreduce(self, index, grad):
         if isinstance(index, (tuple, list)):
             for i in range(len(index)):
-                allreduce_(grad[i], average=False, name=str(index[i]))
+                allreduce_(grad[i], average=False,
+                           name=str(index[i]), priority=-i)
         else:
             allreduce_(grad, average=False, name=str(index))
 
@@ -95,9 +96,11 @@ class DistributedTrainer(mx.gluon.Trainer):
         self._scale /= size()
 
     def _allreduce_grads(self):
-        for i, param in enumerate(self._params):
+        # sort needed for Python < 3.6 is not guaranteed
+        for i, param in enumerate(sorted(self._params, key=lambda p: p.name)):
             if param.grad_req != 'null':
-                allreduce_(param.list_grad()[0], average=False, name=str(i))
+                allreduce_(param.list_grad()[0], average=False,
+                           name=str(i), priority=-i)
 
 
 # Wrapper to inject Horovod broadcast after parameter initialization

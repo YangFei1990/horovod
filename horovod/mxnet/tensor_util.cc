@@ -13,6 +13,8 @@
 // limitations under the License.
 // =============================================================================
 
+#include <mxnet/c_api.h>
+
 #include "tensor_util.h"
 
 namespace horovod {
@@ -45,7 +47,7 @@ const DataType TensorUtil::GetDType(NDArray* tensor) {
 const TensorShape TensorUtil::GetShape(NDArray* tensor) {
   TensorShape shape;
   TShape mx_shape = tensor->shape();
-  for (unsigned idx = 0; idx < mx_shape.ndim(); idx++) {
+  for (int idx = 0; idx < (int)mx_shape.ndim(); idx++) {
     shape.AddDim(mx_shape[idx]);
   }
   return shape;
@@ -121,25 +123,23 @@ int TensorUtil::GetDevice(NDArray* tensor) {
 // If dev_id equal to CPU_DEVICE_ID, construct Tensor on CPU
 // Otherwise construct on GPU
 NDArray* TensorUtil::New(int device, int dtype) {
+  int dev_type = gpu::kDevMask;
   if (device == CPU_DEVICE_ID) {
-    NDArray* my_array = new NDArray(TShape(), Context::CPU(0), false, dtype);
-    return my_array;
-  } else {
-    NDArray* my_array =
-        new NDArray(TShape(), Context::GPU(device), false, dtype);
-    return my_array;
+    dev_type = cpu::kDevMask;
+    device = 0;
   }
+  NDArrayHandle array;
+  MXNDArrayCreateEx(nullptr, 0, dev_type, device, false, dtype, &array);
+  return static_cast<NDArray*>(array);
 }
 
 void TensorUtil::Free(NDArray* tensor) { delete tensor; }
 
 // Resize tensor to nDimension with length size[i] in dimension i
 void TensorUtil::ResizeNd(NDArray* tensor, int nDimension, int64_t* size) {
-  TShape mx_shape(nDimension);
-  for (int idx = 0; idx < nDimension; ++idx) {
-    mx_shape[idx] = size[idx];
-  }
-  tensor->Reshape(mx_shape);
+  void* temp_out;
+  MXNDArrayReshape64(tensor, nDimension, size, false, &temp_out);
+  tensor = static_cast<NDArray*>(temp_out);
 }
 
 // Copy from tensor to output

@@ -1176,6 +1176,7 @@ void PerformOperation(TensorTable& tensor_table, MPIResponse response) {
           }
         }
       } else {
+        std::cout<<"ncclAllReduce"<<endl
         NCCL_CHECK(entries, "ncclAllReduce",
                    ncclAllReduce(fused_input_data, buffer_data,
                                  (size_t)num_elements,

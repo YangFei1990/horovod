@@ -1184,7 +1184,7 @@ void PerformOperation(TensorTable& tensor_table, MPIResponse response) {
                                  nccl_comm, stream))
         auto stop = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-        std::cout<<"[fewu]All reduce "<<(size_t)num_elements<<" elements in "<<duration.count()<<" ms"<<std::endl;
+        std::cout<<"[fewu]["<<nccl_rank<<"]All reduce "<<(size_t)num_elements<<" elements in "<<duration.count()<<" ms"<<std::endl;
         if (timeline.Initialized()) {
           RECORD_EVENT(entries, event_queue, NCCL_ALLREDUCE, stream)
         }

@@ -1176,7 +1176,6 @@ void PerformOperation(TensorTable& tensor_table, MPIResponse response) {
           }
         }
       } else {
-        std::cout<<"ncclAllReduce"<<std::endl;
         auto start = std::chrono::high_resolution_clock::now();
         NCCL_CHECK(entries, "ncclAllReduce",
                    ncclAllReduce(fused_input_data, buffer_data,
@@ -1184,8 +1183,8 @@ void PerformOperation(TensorTable& tensor_table, MPIResponse response) {
                                  GetNCCLDataType(first_entry.tensor), ncclSum,
                                  nccl_comm, stream))
         auto stop = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration_cast<microseconds>(stop - start);
-        std::cout<<"All reduce "<<(size_t)num_elements<<" elements in "<<duration.count()<<" ms"<<std::endl;
+        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+        std::cout<<"[fewu]All reduce "<<(size_t)num_elements<<" elements in "<<duration.count()<<" ms"<<std::endl;
         if (timeline.Initialized()) {
           RECORD_EVENT(entries, event_queue, NCCL_ALLREDUCE, stream)
         }
